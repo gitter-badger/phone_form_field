@@ -30,11 +30,11 @@ void main() {
     });
 
     // // // same test if added, fails
-    // testWidgets('should be properly sorted without favorites', (tester) async {
-    //   await tester.pumpWidget(builder());
-    //   await tester.pumpAndSettle();
-    //   final scaffold = find.byType(Scaffold);
-    //   expect(scaffold, findsOneWidget);
-    // });
+    testWidgets('should be properly sorted without favorites', (tester) async {
+      await tester.pumpWidget(builder());
+      await tester.pumpAndSettle();
+      final scaffold = find.byType(Scaffold);
+      expect(scaffold, findsOneWidget);
+    });
   });
 }
