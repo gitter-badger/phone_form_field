@@ -50,7 +50,7 @@ class PhoneFormField extends StatefulWidget {
 class _PhoneFormFieldState extends State<PhoneFormField> {
   late final BasePhoneParser parser;
   late final PhoneController controller;
-  late final ValueNotifier<PhoneNumberInput?> baseController;
+  late final ValueNotifier<SimplePhoneNumber?> baseController;
 
   @override
   void initState() {
@@ -75,57 +75,59 @@ class _PhoneFormFieldState extends State<PhoneFormField> {
   }
 
   void _onControllerChange() {
-    final phoneInput = baseController.value;
+    final simplePhone = baseController.value;
     final phone = controller.value;
     widget.onChanged?.call(controller.value);
-    if (phoneInput?.national == phone?.nsn &&
-        phoneInput?.isoCode == phone?.isoCode) {
+    if (simplePhone?.national == phone?.nsn &&
+        simplePhone?.isoCode == phone?.isoCode) {
       return;
     }
-    baseController.value = _convertPhoneNumberToPhoneNumberInput(phone);
+    baseController.value = _convertPhoneNumberToSimplePhoneNumber(phone);
   }
 
-  void _onBaseControllerChange(PhoneNumberInput? phoneInput) {
-    if (phoneInput?.national == controller.value?.nsn &&
-        phoneInput?.isoCode == controller.value?.isoCode) {
+  void _onBaseControllerChange(SimplePhoneNumber? simplePhone) {
+    if (simplePhone?.national == controller.value?.nsn &&
+        simplePhone?.isoCode == controller.value?.isoCode) {
       return;
     }
-    if (phoneInput == null) {
+    if (simplePhone == null) {
       return controller.value = null;
     }
-    // we convert the simple phone number to a full blown phone number
+    // we convert the simple phone number to a full blown PhoneNumber
+    // to access validation, formatting etc.
     PhoneNumber phoneNumber;
     // when the base input change we check if its not a whole number
     // to allow for copy pasting and auto fill. If it is one then
     // we parse it accordingly
-    if (phoneInput.national.startsWith(RegExp('[+＋]'))) {
+    if (simplePhone.national.startsWith(RegExp('[+＋]'))) {
       // if starts with + then we parse the whole number
-      phoneNumber = parser.parseRaw(phoneInput.national);
+      // to figure out the country code
+      phoneNumber = parser.parseRaw(simplePhone.national);
     } else {
       phoneNumber = parser.parseWithIsoCode(
-        phoneInput.isoCode,
-        phoneInput.national,
+        simplePhone.isoCode,
+        simplePhone.national,
       );
     }
     controller.value = phoneNumber;
-    baseController.value = PhoneNumberInput(
+    baseController.value = SimplePhoneNumber(
         isoCode: phoneNumber.isoCode, national: phoneNumber.nsn);
   }
 
-  PhoneNumberInput? _convertPhoneNumberToPhoneNumberInput(
+  SimplePhoneNumber? _convertPhoneNumberToSimplePhoneNumber(
       PhoneNumber? phoneNumber) {
     if (phoneNumber == null) return null;
-    return PhoneNumberInput(
+    return SimplePhoneNumber(
         isoCode: phoneNumber.isoCode, national: phoneNumber.nsn);
   }
 
-  PhoneNumber? _convertInputToPhoneNumber(PhoneNumberInput? phoneNumberInput) {
+  PhoneNumber? _convertInputToPhoneNumber(SimplePhoneNumber? phoneNumberInput) {
     if (phoneNumberInput == null) return null;
     return PhoneNumber(
         isoCode: phoneNumberInput.isoCode, nsn: phoneNumberInput.national);
   }
 
-  String? _validate(PhoneNumberInput? phoneNumberInput) {
+  String? _validate(SimplePhoneNumber? phoneNumberInput) {
     final phoneNumber = _convertInputToPhoneNumber(phoneNumberInput);
     if (phoneNumber == null) return null;
     if (phoneNumber.nsn.isEmpty) return null;
@@ -138,7 +140,7 @@ class _PhoneFormFieldState extends State<PhoneFormField> {
     return BasePhoneFormField(
       controller: baseController,
       validator: _validate,
-      initialValue: _convertPhoneNumberToPhoneNumberInput(widget.initialValue),
+      initialValue: _convertPhoneNumberToSimplePhoneNumber(widget.initialValue),
       onChanged: _onBaseControllerChange,
       onSaved: (inp) => widget.onSaved?.call(_convertInputToPhoneNumber(inp)),
       autoFillHints: widget.withHint ? [AutofillHints.telephoneNumber] : null,

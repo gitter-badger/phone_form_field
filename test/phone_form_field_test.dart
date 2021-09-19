@@ -154,7 +154,7 @@ void main() {
       // non digits should not work
       await tester.enterText(foundTextField, '479281938');
       base.onSaved
-          ?.call(PhoneNumberInput(isoCode: 'FR', national: '499887766'));
+          ?.call(SimplePhoneNumber(isoCode: 'FR', national: '499887766'));
       await tester.pumpAndSettle();
       expect(saved, isTrue);
       expect(phoneNumber,

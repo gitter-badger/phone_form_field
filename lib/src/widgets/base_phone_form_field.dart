@@ -11,8 +11,8 @@ import 'flag_dial_code_chip.dart';
 /// That is the base for the PhoneFormField
 ///
 /// This deals with mostly UI and has no dependency on any phone parser library
-class BasePhoneFormField extends FormField<PhoneNumberInput> {
-  final ValueNotifier<PhoneNumberInput?>? controller;
+class BasePhoneFormField extends FormField<SimplePhoneNumber> {
+  final ValueNotifier<SimplePhoneNumber?>? controller;
   final String defaultCountry;
   final bool autofocus;
   final bool showFlagInInput;
@@ -22,7 +22,7 @@ class BasePhoneFormField extends FormField<PhoneNumberInput> {
   final InputDecoration decoration;
   final TextStyle inputTextStyle;
   final Color? cursorColor;
-  final ValueChanged<PhoneNumberInput?>? onChanged;
+  final ValueChanged<SimplePhoneNumber?>? onChanged;
   final Iterable<String>? autoFillHints;
   final Function()? onEditingComplete;
 
@@ -32,11 +32,11 @@ class BasePhoneFormField extends FormField<PhoneNumberInput> {
   BasePhoneFormField({
     // form field params
     Key? key,
-    PhoneNumberInput? initialValue,
+    SimplePhoneNumber? initialValue,
     bool enabled = true,
     AutovalidateMode autovalidateMode = AutovalidateMode.onUserInteraction,
-    void Function(PhoneNumberInput?)? onSaved,
-    String? Function(PhoneNumberInput?)? validator,
+    void Function(SimplePhoneNumber?)? onSaved,
+    String? Function(SimplePhoneNumber?)? validator,
     // our params
     this.controller,
     this.onChanged,
@@ -67,86 +67,60 @@ class BasePhoneFormField extends FormField<PhoneNumberInput> {
   _BasePhoneFormFieldState createState() => _BasePhoneFormFieldState();
 }
 
-class _BasePhoneFormFieldState extends FormFieldState<PhoneNumberInput> {
+class _BasePhoneFormFieldState extends FormFieldState<SimplePhoneNumber> {
   final FocusNode _focusNode = FocusNode();
 
   /// this is the controller for the national phone number
-  late final TextEditingController _nationalController;
-  late final ValueNotifier<String> _isoCodeController;
-  late final ValueNotifier<PhoneNumberInput?> _phoneController;
+  late final TextEditingController _nationalNumberController;
+  late final ValueNotifier<SimplePhoneNumber> _phoneController;
 
   @override
   BasePhoneFormField get widget => super.widget as BasePhoneFormField;
 
-  bool get isOutlineBorder => widget.decoration.border is OutlineInputBorder;
+  bool get _isOutlineBorder => widget.decoration.border is OutlineInputBorder;
+  String get _isoCode => value?.isoCode ?? 'US';
 
   _BasePhoneFormFieldState();
 
   @override
   void initState() {
     super.initState();
-    _nationalController =
+    _nationalNumberController =
         TextEditingController(text: widget.initialValue?.national);
-    _isoCodeController = ValueNotifier<String>(
-      widget.initialValue?.isoCode ?? widget.defaultCountry,
-    );
-    _phoneController = widget.controller ??
-        ValueNotifier<PhoneNumberInput?>(widget.initialValue);
-    _nationalController.addListener(_reflectChangesOnParentController);
-    _isoCodeController.addListener(_reflectChangesOnParentController);
-    _phoneController.addListener(_reflectChangesOnChildControllers);
-    _phoneController.addListener(_onChange);
     _focusNode.addListener(() => setState(() {}));
+  }
+
+  /// to update the current value of the input
+  void updateValue({String? national, String? isoCode}) {
+    // if the national number has changed we need to update the controller value
+    if (national != null && national != _nationalNumberController.text) {
+      _nationalNumberController.value = TextEditingValue(
+        text: national,
+        selection: TextSelection.fromPosition(
+          TextPosition(offset: national.length),
+        ),
+      );
+    }
+    final nextValue = SimplePhoneNumber(
+      isoCode: isoCode ?? _isoCode,
+      national: national ?? '',
+    );
+    // update form
+    didChange(nextValue);
+    widget.onChanged?.call(nextValue);
   }
 
   @override
   void dispose() {
     _focusNode.dispose();
-    _nationalController.dispose();
-    _isoCodeController.dispose();
-    // dispose the phoneController only when it's initialised in this
-    // instance otherwise this should be done where instance is created
-    if (widget.controller == null) {
-      _phoneController.dispose();
-    }
+    _nationalNumberController.dispose();
     super.dispose();
-  }
-
-  /// called when one of the sub inputs changes
-  _reflectChangesOnParentController() {
-    final national = _nationalController.text;
-    final isoCode = _isoCodeController.value;
-    _phoneController.value = PhoneNumberInput(
-      isoCode: isoCode,
-      national: national,
-    );
-  }
-
-  /// called when the main controller changes to change the children
-  _reflectChangesOnChildControllers() {
-    final national = _phoneController.value?.national ?? '';
-    final isoCode = _phoneController.value?.isoCode;
-    _nationalController.value = TextEditingValue(
-      text: national,
-      selection: TextSelection.fromPosition(
-        TextPosition(offset: national.length),
-      ),
-    );
-    _isoCodeController.value = isoCode ?? widget.defaultCountry;
-  }
-
-  /// called when the phone controller changes
-  _onChange() {
-    if (_phoneController.value != value) {
-      didChange(_phoneController.value);
-      widget.onChanged?.call(value);
-    }
   }
 
   selectCountry() async {
     final selected = await widget.selectorNavigator.navigate(context);
     if (selected != null) {
-      _isoCodeController.value = selected.isoCode;
+      updateValue(isoCode: selected.isoCode);
     }
     _focusNode.requestFocus();
   }
@@ -169,7 +143,8 @@ class _BasePhoneFormFieldState extends FormFieldState<PhoneNumberInput> {
   Widget _textField() {
     return TextFormField(
       focusNode: _focusNode,
-      controller: _nationalController,
+      controller: _nationalNumberController,
+      onChanged: (national) => updateValue(national: national),
       style: widget.inputTextStyle,
       autofocus: widget.autofocus,
       autofillHints: widget.autoFillHints,
@@ -195,7 +170,7 @@ class _BasePhoneFormFieldState extends FormFieldState<PhoneNumberInput> {
           // outline border has padding on the left
           // so we need to make it a 12 bigger
           // and we add 16 horizontally to make it the whole height
-          padding: isOutlineBorder
+          padding: _isOutlineBorder
               ? const EdgeInsets.fromLTRB(12, 16, 0, 16)
               : const EdgeInsets.fromLTRB(0, 16, 0, 16),
           child: _getDialCodeChip(),
@@ -215,7 +190,7 @@ class _BasePhoneFormFieldState extends FormFieldState<PhoneNumberInput> {
     return Padding(
       padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
       child: FlagDialCodeChip(
-        country: Country(_isoCodeController.value),
+        country: Country(_isoCode),
         showFlag: widget.showFlagInInput,
         textStyle: TextStyle(fontSize: 16),
         flagSize: 20,
