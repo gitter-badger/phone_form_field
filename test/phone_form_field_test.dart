@@ -2,6 +2,9 @@ import 'package:circle_flags/circle_flags.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:phone_form_field/phone_form_field.dart';
+import 'package:phone_form_field/src/models/phone_controller.dart';
+import 'package:phone_form_field/src/widgets/country_picker/country_selector.dart';
+import 'package:phone_form_field/src/widgets/flag_dial_code_chip.dart';
 
 void main() {
   group('PhoneFormField', () {

@@ -1,15 +1,12 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:phone_form_field/l10n/generated/phone_field_localization.dart';
+import 'package:phone_form_field/src/models/phone_controller.dart';
 import 'package:phone_form_field/src/models/simple_phone_number.dart';
 import 'package:phone_form_field/src/widgets/base_phone_form_field.dart';
 import 'package:phone_numbers_parser/phone_numbers_parser.dart';
 
 import 'country_picker/country_selector_navigator.dart';
-
-typedef PhoneController = ValueNotifier<PhoneNumber?>;
 
 class PhoneFormField extends FormField<PhoneNumber> {
   final PhoneController? controller;
@@ -51,7 +48,8 @@ class PhoneFormField extends FormField<PhoneNumber> {
           key: key,
           autovalidateMode: autovalidateMode,
           enabled: enabled,
-          initialValue: controller != null ? controller.value : initialValue,
+          initialValue:
+              controller != null ? controller.initialValue : initialValue,
           onSaved: onSaved,
           validator:
               _getDefaultValidator(type: phoneNumberType, errorText: errorText),

@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -27,7 +29,7 @@ class BasePhoneFormField extends StatefulWidget {
   /// configures the way the country picker selector is shown
   final CountrySelectorNavigator selectorNavigator;
 
-  const BasePhoneFormField({
+  BasePhoneFormField({
     // form field params
     Key? key,
     required this.controller,
@@ -41,7 +43,7 @@ class BasePhoneFormField extends StatefulWidget {
     required this.decoration,
     required this.cursorColor,
     required this.selectorNavigator,
-  }) : super(key: key);
+  });
 
   @override
   _BasePhoneFormFieldState createState() => _BasePhoneFormFieldState();
@@ -51,8 +53,7 @@ class _BasePhoneFormFieldState extends State<BasePhoneFormField> {
   final FocusNode _focusNode = FocusNode();
 
   /// this is the controller for the national phone number
-  late final _nationalNumberController =
-      TextEditingController(text: value?.national);
+  late TextEditingController _nationalNumberController;
 
   bool get _isOutlineBorder => widget.decoration.border is OutlineInputBorder;
   SimplePhoneNumber? get value => widget.controller.value;
@@ -62,31 +63,32 @@ class _BasePhoneFormFieldState extends State<BasePhoneFormField> {
 
   @override
   void initState() {
-    print('init state');
-    super.initState();
+    print('base init state');
+    _nationalNumberController = TextEditingController(text: value?.national);
     widget.controller.addListener(() => _updateValue(widget.controller.value));
     _focusNode.addListener(() => setState(() {}));
+    super.initState();
   }
 
   /// to update the current value of the input
-  void _updateValue(SimplePhoneNumber? phoneNumber) {
-    print('updating value');
+  void _updateValue(SimplePhoneNumber? phoneNumber) async {
+    print('updating value: $phoneNumber');
     final national = phoneNumber?.national ?? '';
     // if the national number has changed from outside we need to update
     // the controller value
     if (national != _nationalNumberController.text) {
-      _nationalNumberController.value = TextEditingValue(
-        text: national,
-        selection: TextSelection.fromPosition(
-          TextPosition(offset: national.length),
-        ),
-      );
+      // we need to use a future here because when resetting
+      // there is a race condition between the focus out event (clicking on reset)
+      // which updates the value to the current one without text selection
+      // and the actual reset
+      await Future.value();
       _nationalNumberController.text = national;
     }
     // when updating from within
     if (widget.controller.value != phoneNumber) {
       widget.controller.value = phoneNumber;
     }
+    print('v: ${_nationalNumberController.value}');
   }
 
   @override
@@ -121,7 +123,7 @@ class _BasePhoneFormFieldState extends State<BasePhoneFormField> {
   }
 
   Widget _textField() {
-    print('get text');
+    print('get text ${_nationalNumberController.value}');
     return TextFormField(
       focusNode: _focusNode,
       controller: _nationalNumberController,
