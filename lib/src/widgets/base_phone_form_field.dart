@@ -51,7 +51,8 @@ class _BasePhoneFormFieldState extends State<BasePhoneFormField> {
   final FocusNode _focusNode = FocusNode();
 
   /// this is the controller for the national phone number
-  late final TextEditingController _nationalNumberController;
+  late final _nationalNumberController =
+      TextEditingController(text: value?.national);
 
   bool get _isOutlineBorder => widget.decoration.border is OutlineInputBorder;
   SimplePhoneNumber? get value => widget.controller.value;
@@ -62,7 +63,6 @@ class _BasePhoneFormFieldState extends State<BasePhoneFormField> {
   @override
   void initState() {
     super.initState();
-    _nationalNumberController = TextEditingController(text: value?.national);
     widget.controller.addListener(() => _updateValue(widget.controller.value));
     _focusNode.addListener(() => setState(() {}));
   }
@@ -72,7 +72,6 @@ class _BasePhoneFormFieldState extends State<BasePhoneFormField> {
     final national = phoneNumber?.national ?? '';
     // if the national number has changed from outside we need to update
     // the controller value
-    print('national: $national');
     if (national != _nationalNumberController.text) {
       _nationalNumberController.value = TextEditingValue(
         text: national,
@@ -89,6 +88,7 @@ class _BasePhoneFormFieldState extends State<BasePhoneFormField> {
 
   @override
   void dispose() {
+    print('dispose');
     _focusNode.dispose();
     _nationalNumberController.dispose();
     super.dispose();
