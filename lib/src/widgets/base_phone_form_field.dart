@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
-import 'package:phone_form_field/src/models/phone_number_input.dart';
+import 'package:phone_form_field/src/models/simple_phone_number.dart';
 
 import '../models/country.dart';
 import 'country_picker/country_selector_navigator.dart';
@@ -70,10 +70,12 @@ class _BasePhoneFormFieldState extends State<BasePhoneFormField> {
   /// to update the current value of the input
   void _updateValue(SimplePhoneNumber? phoneNumber) {
     final national = phoneNumber?.national ?? '';
-    // if the national number has changed we need to update the controller value
+    // if the national number has changed from outside we need to update
+    // the controller value
+    print('national: $national');
     if (national != _nationalNumberController.text) {
       _nationalNumberController.value = TextEditingValue(
-        text: phoneNumber?.national ?? '',
+        text: national,
         selection: TextSelection.fromPosition(
           TextPosition(offset: national.length),
         ),

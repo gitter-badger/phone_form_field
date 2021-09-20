@@ -9,39 +9,53 @@ void main() {
 
 /// putting the widget at the top so it's easily findable in pub.dev example
 
-Widget getPhoneField(
-    {
-    // those fields are not required in the input
-    required Key key,
-    required PhoneController controller,
-    required CountrySelectorNavigator selectorNavigator,
-    required bool withLabel,
-    required bool outlineBorder,
-    required bool mobileOnly,
-    required bool autovalidate,
-    required Function(PhoneNumber?) onChanged}) {
-  return AutofillGroup(
-    child: PhoneFormField(
-      key: key,
-      autofocus: true,
-      withHint: true,
-      controller: controller,
-      selectorNavigator: selectorNavigator,
-      defaultCountry: 'FR',
-      decoration: InputDecoration(
-        labelText: withLabel ? 'Phone' : null,
-        border: outlineBorder ? OutlineInputBorder() : UnderlineInputBorder(),
+class PhoneFieldView extends StatelessWidget {
+  final Key inputKey;
+  final PhoneController controller;
+  final CountrySelectorNavigator selectorNavigator;
+  final bool withLabel;
+  final bool outlineBorder;
+  final bool mobileOnly;
+  final bool autovalidate;
+  final Function(PhoneNumber?) onChanged;
+
+  const PhoneFieldView({
+    Key? key,
+    required this.inputKey,
+    required this.controller,
+    required this.selectorNavigator,
+    required this.withLabel,
+    required this.outlineBorder,
+    required this.mobileOnly,
+    required this.autovalidate,
+    required this.onChanged,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return AutofillGroup(
+      child: PhoneFormField(
+        key: inputKey,
+        autofocus: true,
+        withHint: true,
+        controller: controller,
+        selectorNavigator: selectorNavigator,
+        defaultCountry: 'FR',
+        decoration: InputDecoration(
+          labelText: withLabel ? 'Phone' : null,
+          border: outlineBorder ? OutlineInputBorder() : UnderlineInputBorder(),
+        ),
+        enabled: true,
+        showFlagInInput: true,
+        phoneNumberType: mobileOnly ? PhoneNumberType.mobile : null,
+        autovalidateMode: autovalidate
+            ? AutovalidateMode.onUserInteraction
+            : AutovalidateMode.disabled,
+        errorText: 'Invalid phone',
+        onChanged: onChanged,
       ),
-      enabled: true,
-      showFlagInInput: true,
-      phoneNumberType: mobileOnly ? PhoneNumberType.mobile : null,
-      autovalidateMode: autovalidate
-          ? AutovalidateMode.onUserInteraction
-          : AutovalidateMode.disabled,
-      errorText: 'Invalid phone',
-      onChanged: onChanged,
-    ),
-  );
+    );
+  }
 }
 
 class MyApp extends StatelessWidget {
@@ -85,12 +99,24 @@ class _PhoneFormFieldScreenState extends State<PhoneFormFieldScreen> {
   CountrySelectorNavigator selectorNavigator = const BottomSheetNavigator();
   final formKey = GlobalKey<FormState>();
   final phoneKey = GlobalKey<FormFieldState>();
+  late final Widget _phoneFormField;
 
   @override
   initState() {
+    print('init state');
     super.initState();
     controller = PhoneController(null);
     controller.addListener(() => setState(() {}));
+    _phoneFormField = PhoneFieldView(
+      inputKey: phoneKey,
+      controller: controller,
+      selectorNavigator: selectorNavigator,
+      withLabel: withLabel,
+      outlineBorder: outlineBorder,
+      mobileOnly: mobileOnly,
+      autovalidate: autovalidate,
+      onChanged: (p) => print('changed $p'),
+    );
   }
 
   @override
@@ -175,26 +201,10 @@ class _PhoneFormFieldScreenState extends State<PhoneFormFieldScreen> {
                     SizedBox(
                       height: 40,
                     ),
-                    // AutofillGroup(
-                    //   child: TextField(
-                    //     autofillHints: <String>[
-                    //       AutofillHints.telephoneNumber,
-                    //     ],
-                    //   ),
-                    // ),
                     Form(
                       key: formKey,
-                      child: getPhoneField(
-                          key: phoneKey,
-                          controller: controller,
-                          selectorNavigator: selectorNavigator,
-                          withLabel: withLabel,
-                          outlineBorder: outlineBorder,
-                          mobileOnly: mobileOnly,
-                          autovalidate: autovalidate,
-                          onChanged: (p) => print('changed $p')),
+                      child: _phoneFormField,
                     ),
-
                     SizedBox(
                       height: 40,
                     ),

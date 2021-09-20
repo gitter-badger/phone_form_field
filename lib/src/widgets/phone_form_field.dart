@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:phone_form_field/l10n/generated/phone_field_localization.dart';
-import 'package:phone_form_field/src/models/phone_number_input.dart';
+import 'package:phone_form_field/src/models/simple_phone_number.dart';
 import 'package:phone_form_field/src/widgets/base_phone_form_field.dart';
 import 'package:phone_numbers_parser/phone_numbers_parser.dart';
 
@@ -122,9 +122,10 @@ class _PhoneFormFieldState extends FormFieldState<PhoneNumber> {
   }
 
   @override
-  void didChange(PhoneNumber? value) {
-    controller.value = value;
-    super.didChange(value);
+  void reset() {
+    print('reset: ${widget.initialValue}');
+    controller.value = widget.initialValue;
+    super.reset();
   }
 
   void _onControllerChange() {

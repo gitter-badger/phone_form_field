@@ -34,4 +34,8 @@ class SimplePhoneNumber {
 
   @override
   int get hashCode => national.hashCode ^ isoCode.hashCode;
+
+  @override
+  String toString() =>
+      'SimplePhoneNumber(national: $national, isoCode: $isoCode)';
 }
