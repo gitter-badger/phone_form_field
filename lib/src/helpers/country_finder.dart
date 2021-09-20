@@ -1,7 +1,6 @@
 // responsible of searching through the country list
 
 import 'package:flutter/cupertino.dart';
-import 'package:phone_form_field/l10n/generated/phone_field_localization.dart';
 import 'package:phone_form_field/src/helpers/country_translator.dart';
 
 import '../models/country.dart';

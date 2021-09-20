@@ -1,7 +1,4 @@
 import 'package:dart_countries/dart_countries.dart';
-import 'package:flutter/widgets.dart';
-
-import '../../phone_form_field.dart';
 
 /// Country regroup informations for displaying a list of countries
 class Country {
