@@ -88,7 +88,6 @@ class _BasePhoneFormFieldState extends State<BasePhoneFormField> {
 
   @override
   void dispose() {
-    print('dispose');
     _focusNode.dispose();
     _nationalNumberController.dispose();
     super.dispose();
