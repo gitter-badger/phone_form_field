@@ -99,7 +99,6 @@ class _PhoneFormFieldScreenState extends State<PhoneFormFieldScreen> {
   CountrySelectorNavigator selectorNavigator = const BottomSheetNavigator();
   final formKey = GlobalKey<FormState>();
   final phoneKey = GlobalKey<FormFieldState>();
-  late final Widget _phoneFormField;
 
   @override
   initState() {
@@ -107,16 +106,6 @@ class _PhoneFormFieldScreenState extends State<PhoneFormFieldScreen> {
     super.initState();
     controller = PhoneController(null);
     controller.addListener(() => setState(() {}));
-    _phoneFormField = PhoneFieldView(
-      inputKey: phoneKey,
-      controller: controller,
-      selectorNavigator: selectorNavigator,
-      withLabel: withLabel,
-      outlineBorder: outlineBorder,
-      mobileOnly: mobileOnly,
-      autovalidate: autovalidate,
-      onChanged: (p) => print('changed $p'),
-    );
   }
 
   @override
@@ -203,7 +192,16 @@ class _PhoneFormFieldScreenState extends State<PhoneFormFieldScreen> {
                     ),
                     Form(
                       key: formKey,
-                      child: _phoneFormField,
+                      child: PhoneFieldView(
+                        inputKey: phoneKey,
+                        controller: controller,
+                        selectorNavigator: selectorNavigator,
+                        withLabel: withLabel,
+                        outlineBorder: outlineBorder,
+                        mobileOnly: mobileOnly,
+                        autovalidate: autovalidate,
+                        onChanged: (p) => print('changed $p'),
+                      ),
                     ),
                     SizedBox(
                       height: 40,

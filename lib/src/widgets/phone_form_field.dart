@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:phone_form_field/l10n/generated/phone_field_localization.dart';
@@ -49,7 +51,7 @@ class PhoneFormField extends FormField<PhoneNumber> {
           key: key,
           autovalidateMode: autovalidateMode,
           enabled: enabled,
-          initialValue: controller == null ? initialValue : controller.value,
+          initialValue: controller != null ? controller.value : initialValue,
           onSaved: onSaved,
           validator:
               _getDefaultValidator(type: phoneNumberType, errorText: errorText),
@@ -123,12 +125,14 @@ class _PhoneFormFieldState extends FormFieldState<PhoneNumber> {
 
   @override
   void reset() {
-    print('reset: ${widget.initialValue}');
+    print('reset start');
+    print('v: ${controller.value}, i: ${widget.initialValue}');
     controller.value = widget.initialValue;
     super.reset();
   }
 
   void _onControllerChange() {
+    print('controller changed');
     final basePhone = baseController.value;
     final phone = controller.value;
     widget.onChanged?.call(controller.value);
@@ -141,6 +145,7 @@ class _PhoneFormFieldState extends FormFieldState<PhoneNumber> {
   }
 
   void _onBaseControllerChange(SimplePhoneNumber? basePhone) {
+    print('base ctrl changed');
     if (basePhone?.national == controller.value?.nsn &&
         basePhone?.isoCode == controller.value?.isoCode) {
       return;

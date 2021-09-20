@@ -62,6 +62,7 @@ class _BasePhoneFormFieldState extends State<BasePhoneFormField> {
 
   @override
   void initState() {
+    print('init state');
     super.initState();
     widget.controller.addListener(() => _updateValue(widget.controller.value));
     _focusNode.addListener(() => setState(() {}));
@@ -69,6 +70,7 @@ class _BasePhoneFormFieldState extends State<BasePhoneFormField> {
 
   /// to update the current value of the input
   void _updateValue(SimplePhoneNumber? phoneNumber) {
+    print('updating value');
     final national = phoneNumber?.national ?? '';
     // if the national number has changed from outside we need to update
     // the controller value
@@ -79,6 +81,7 @@ class _BasePhoneFormFieldState extends State<BasePhoneFormField> {
           TextPosition(offset: national.length),
         ),
       );
+      _nationalNumberController.text = national;
     }
     // when updating from within
     if (widget.controller.value != phoneNumber) {
@@ -118,6 +121,7 @@ class _BasePhoneFormFieldState extends State<BasePhoneFormField> {
   }
 
   Widget _textField() {
+    print('get text');
     return TextFormField(
       focusNode: _focusNode,
       controller: _nationalNumberController,
@@ -130,7 +134,10 @@ class _BasePhoneFormFieldState extends State<BasePhoneFormField> {
       textDirection: TextDirection.ltr,
       keyboardType: TextInputType.phone,
       cursorColor: widget.cursorColor,
-      decoration: _getEffectiveDecoration(),
+      decoration: widget.decoration.copyWith(
+        errorText: widget.errorText,
+        prefix: _getDialCodeChip(),
+      ),
     );
   }
 
@@ -153,13 +160,6 @@ class _BasePhoneFormFieldState extends State<BasePhoneFormField> {
           child: _getDialCodeChip(),
         ),
       ),
-    );
-  }
-
-  InputDecoration _getEffectiveDecoration() {
-    return widget.decoration.copyWith(
-      errorText: widget.errorText,
-      prefix: _getDialCodeChip(),
     );
   }
 
