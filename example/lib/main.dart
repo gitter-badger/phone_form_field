@@ -102,7 +102,6 @@ class _PhoneFormFieldScreenState extends State<PhoneFormFieldScreen> {
 
   @override
   initState() {
-    print('init state');
     super.initState();
     controller = PhoneController(null);
     controller.addListener(() => setState(() {}));

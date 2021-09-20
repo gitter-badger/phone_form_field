@@ -123,14 +123,11 @@ class _PhoneFormFieldState extends FormFieldState<PhoneNumber> {
 
   @override
   void reset() {
-    print('reset start');
-    print('v: ${controller.value}, i: ${widget.initialValue}');
     controller.value = widget.initialValue;
     super.reset();
   }
 
   void _onControllerChange() {
-    print('controller changed');
     final basePhone = baseController.value;
     final phone = controller.value;
     widget.onChanged?.call(controller.value);
@@ -143,7 +140,6 @@ class _PhoneFormFieldState extends FormFieldState<PhoneNumber> {
   }
 
   void _onBaseControllerChange(SimplePhoneNumber? basePhone) {
-    print('base ctrl changed');
     if (basePhone?.national == controller.value?.nsn &&
         basePhone?.isoCode == controller.value?.isoCode) {
       return;

@@ -63,7 +63,6 @@ class _BasePhoneFormFieldState extends State<BasePhoneFormField> {
 
   @override
   void initState() {
-    print('base init state');
     _nationalNumberController = TextEditingController(text: value?.national);
     widget.controller.addListener(() => _updateValue(widget.controller.value));
     _focusNode.addListener(() => setState(() {}));
@@ -72,7 +71,6 @@ class _BasePhoneFormFieldState extends State<BasePhoneFormField> {
 
   /// to update the current value of the input
   void _updateValue(SimplePhoneNumber? phoneNumber) async {
-    print('updating value: $phoneNumber');
     final national = phoneNumber?.national ?? '';
     // if the national number has changed from outside we need to update
     // the controller value
@@ -88,7 +86,6 @@ class _BasePhoneFormFieldState extends State<BasePhoneFormField> {
     if (widget.controller.value != phoneNumber) {
       widget.controller.value = phoneNumber;
     }
-    print('v: ${_nationalNumberController.value}');
   }
 
   @override
@@ -123,7 +120,6 @@ class _BasePhoneFormFieldState extends State<BasePhoneFormField> {
   }
 
   Widget _textField() {
-    print('get text ${_nationalNumberController.value}');
     return TextFormField(
       focusNode: _focusNode,
       controller: _nationalNumberController,
