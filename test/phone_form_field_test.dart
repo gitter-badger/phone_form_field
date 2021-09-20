@@ -2,10 +2,11 @@ import 'package:circle_flags/circle_flags.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:phone_form_field/phone_form_field.dart';
-import 'package:phone_form_field/src/models/phone_number_input.dart';
 
 void main() {
   group('PhoneFormField', () {
+    final formKey = GlobalKey<FormState>();
+    final phoneKey = GlobalKey<FormFieldState>();
     Widget getWidget({
       Function(PhoneNumber?)? onChanged,
       Function(PhoneNumber?)? onSaved,
@@ -17,14 +18,18 @@ void main() {
     }) =>
         MaterialApp(
           home: Scaffold(
-            body: PhoneFormField(
-              initialValue: initialValue,
-              onChanged: onChanged,
-              onSaved: onSaved,
-              showFlagInInput: showFlagInInput,
-              controller: controller,
-              defaultCountry: defaultCountry,
-              phoneNumberType: phoneNumberType,
+            body: Form(
+              key: formKey,
+              child: PhoneFormField(
+                key: phoneKey,
+                initialValue: initialValue,
+                onChanged: onChanged,
+                onSaved: onSaved,
+                showFlagInInput: showFlagInInput,
+                controller: controller,
+                defaultCountry: defaultCountry,
+                phoneNumberType: phoneNumberType,
+              ),
             ),
           ),
         );
@@ -83,13 +88,13 @@ void main() {
       await tester
           .pumpWidget(getWidget(controller: controller, defaultCountry: 'US'));
       controller.value = PhoneParser().parseWithIsoCode('FR', '488997722');
-      await tester.pump();
+      await tester.pumpAndSettle();
       expect(find.text('+ 33'), findsOneWidget);
       expect(find.text('488997722'), findsOneWidget);
     });
 
     testWidgets(
-        'Should change value of dial code chip when full number written',
+        'Should change value of dial code chip when full number copy pasted',
         (tester) async {
       final controller = PhoneController(null);
       // ignore: unused_local_variable
@@ -140,24 +145,33 @@ void main() {
         saved = true;
         phoneNumber = p;
       };
-      await tester.pumpWidget(
-        getWidget(
-          initialValue: phoneNumber,
-          onSaved: onSaved,
-        ),
-      );
+      await tester.pumpWidget(getWidget(
+        initialValue: phoneNumber,
+        onSaved: onSaved,
+      ));
       final foundTextField = find.byType(TextFormField);
-      final foundBase = find.byType(BasePhoneFormField);
-      final base = tester.widget<BasePhoneFormField>(foundBase);
-      expect(base.onSaved != null, isTrue);
-      // non digits should not work
       await tester.enterText(foundTextField, '479281938');
-      base.onSaved
-          ?.call(SimplePhoneNumber(isoCode: 'FR', national: '499887766'));
+      await tester.pumpAndSettle();
+      formKey.currentState?.save();
       await tester.pumpAndSettle();
       expect(saved, isTrue);
       expect(phoneNumber,
-          equals(PhoneParser().parseWithIsoCode('FR', '499887766')));
+          equals(PhoneParser().parseWithIsoCode('FR', '479281938')));
+    });
+
+    testWidgets('Should reset', (tester) async {
+      PhoneNumber? phoneNumber =
+          PhoneParser().parseWithIsoCode('FR', 'national');
+
+      await tester.pumpWidget(getWidget(initialValue: phoneNumber));
+      await tester.pumpAndSettle();
+      final national = '123456';
+      final foundTextField = find.byType(TextFormField);
+      await tester.enterText(foundTextField, national);
+      expect(find.text(national), findsOneWidget);
+      formKey.currentState?.reset();
+      await tester.pumpAndSettle();
+      expect(find.text(national), findsNothing);
     });
 
     testWidgets('Should tell when a phone number is not valid', (tester) async {

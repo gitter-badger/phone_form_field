@@ -1,4 +1,3 @@
-import 'package:example/widgets/app_drawer.dart';
 import 'package:example/widgets/switch_el.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -10,21 +9,25 @@ void main() {
 
 /// putting the widget at the top so it's easily findable in pub.dev example
 
-Widget getPhoneField({
-  required PhoneController controller,
-  required CountrySelectorNavigator selectorNavigator,
-  required bool withLabel,
-  required bool outlineBorder,
-  required bool mobileOnly,
-  required bool autovalidate,
-}) {
+Widget getPhoneField(
+    {
+    // those fields are not required in the input
+    required Key key,
+    required PhoneController controller,
+    required CountrySelectorNavigator selectorNavigator,
+    required bool withLabel,
+    required bool outlineBorder,
+    required bool mobileOnly,
+    required bool autovalidate,
+    required Function(PhoneNumber?) onChanged}) {
   return AutofillGroup(
     child: PhoneFormField(
+      key: key,
       autofocus: true,
-      lightParser: false,
       withHint: true,
       controller: controller,
       selectorNavigator: selectorNavigator,
+      defaultCountry: 'FR',
       decoration: InputDecoration(
         labelText: withLabel ? 'Phone' : null,
         border: outlineBorder ? OutlineInputBorder() : UnderlineInputBorder(),
@@ -36,7 +39,7 @@ Widget getPhoneField({
           ? AutovalidateMode.onUserInteraction
           : AutovalidateMode.disabled,
       errorText: 'Invalid phone',
-      onChanged: (p) => print('changed $p'),
+      onChanged: onChanged,
     ),
   );
 }
@@ -80,6 +83,8 @@ class _PhoneFormFieldScreenState extends State<PhoneFormFieldScreen> {
   bool autovalidate = true;
   bool mobileOnly = true;
   CountrySelectorNavigator selectorNavigator = const BottomSheetNavigator();
+  final formKey = GlobalKey<FormState>();
+  final phoneKey = GlobalKey<FormFieldState>();
 
   @override
   initState() {
@@ -177,22 +182,26 @@ class _PhoneFormFieldScreenState extends State<PhoneFormFieldScreen> {
                     //     ],
                     //   ),
                     // ),
-                    getPhoneField(
-                      controller: controller,
-                      selectorNavigator: selectorNavigator,
-                      withLabel: withLabel,
-                      outlineBorder: outlineBorder,
-                      mobileOnly: mobileOnly,
-                      autovalidate: autovalidate,
+                    Form(
+                      key: formKey,
+                      child: getPhoneField(
+                          key: phoneKey,
+                          controller: controller,
+                          selectorNavigator: selectorNavigator,
+                          withLabel: withLabel,
+                          outlineBorder: outlineBorder,
+                          mobileOnly: mobileOnly,
+                          autovalidate: autovalidate,
+                          onChanged: (p) => print('changed $p')),
                     ),
+
                     SizedBox(
                       height: 40,
                     ),
                     ElevatedButton(
-                      onPressed: controller.value == null ||
-                              controller.value!.nsn.isEmpty
+                      onPressed: controller.value == null
                           ? null
-                          : () => controller.value = null,
+                          : () => formKey.currentState?.reset(),
                       child: Text('reset'),
                     ),
                     SizedBox(
