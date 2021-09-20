@@ -148,7 +148,6 @@ void main() {
       );
       final foundTextField = find.byType(TextFormField);
       final foundBase = find.byType(BasePhoneFormField);
-      final txtField = tester.widget<TextFormField>(foundTextField);
       final base = tester.widget<BasePhoneFormField>(foundBase);
       expect(base.onSaved != null, isTrue);
       // non digits should not work
