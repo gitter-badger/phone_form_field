@@ -1,3 +1,5 @@
+import 'package:phone_numbers_parser/phone_numbers_parser.dart';
+
 class SimplePhoneNumber {
   final String national;
   final String isoCode;
@@ -6,6 +8,10 @@ class SimplePhoneNumber {
     required this.isoCode,
     required this.national,
   });
+
+  SimplePhoneNumber.fromPhoneNumber(PhoneNumber phoneNumber)
+      : isoCode = phoneNumber.isoCode,
+        national = phoneNumber.nsn;
 
   SimplePhoneNumber copyWith({
     String? national,
